@@ -1,4 +1,2 @@
 flask
-datetime
-dateutil
 mysql
