@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .logo-section {
+            background-color: #006B54;
+            color: white;
+            padding: 15px;
+            float: left;
+        }
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .customer-info {
+            float: right;
+            padding: 15px;
+        }
+        .clear {
+            clear: both;
+        }
+        .important-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #006B54;
+        }
+        .bill-table {
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .bill-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #4CAF50;
+        }
+        .bill-table td {
+            border: 1px solid #ddd;
+            font-size: 12px;
+            text-align: center;
+            height: 30px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .no-border-top {
+            border-top: none !important;
+        }
+        .no-border-bottom {
+            border-bottom: none !important;
+        }
+        .total-section {
+            background-color: #e9ecef;
+            padding: 10px;
+            text-align: right;
+            margin-top: 15px;
+        }
+        .highlight {
+            color: #006B54;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        h3 {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-text">ENERGY CO.</div>
+                <h2>Invoice #: {{invoice_id}}</h2>
+                <h1>Contract #: {{id_contract}}</h1>
+            </div>
+            <div class="customer-info">
+                <h2>Energy Bill</h2>
+                <p>{{contract_name}}<br>
+                {{address}}</p>
+            </div>
+        </div>
+        <div class="clear"></div>
+        
+        <div class="important-info">
+            <h3>Important Dates</h3>
+            <p>Creation Date: {{issue_date}}<br>
+            Next Reading Date: {{next_reading}}<br>
+            Suspension Date: {{suspension_date}}<br>
+            Reading Number: {{id_reading}}</p>
+        </div>
+
+        <table class="bill-table">
+            <thead>
+                <tr>
+                    <th class="description-col">Description</th>
+                    <th class="details-col">Details</th>
+                    <th class="amount-col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Stratum</td>
+                    <td>{{stratum}}</td>
+                    <td class="text-right">-</td>
+                </tr>
+                <tr>
+                    <td>kW Cost</td>
+                    <td>kW/h</td>
+                    <td class="text-right">${{kw_cost}}</td>
+                </tr>
+                <tr>
+                    <td>Financing</td>
+                    <td>Payment Plan</td>
+                    <td class="text-right">${{financing}}</td>
+                </tr>
+                <tr>
+                    <td>Public Lighting</td>
+                    <td>Municipal Fee</td>
+                    <td class="text-right">${{public_lighting}}</td>
+                </tr>
+                <tr>
+                    <td>Energy Consumed</td>
+                    <td>{{kw_consumed}} kWh</td>
+                    <td class="text-right">${{cost_energy}}</td>
+                </tr>
+                <tr>
+                    <td>Subtotal</td>
+                    <td></td>
+                    <td class="text-right">${{subtotal}}</td>
+                </tr>
+                <tr>
+                    <td>Rounding</td>
+                    <td></td>
+                    <td class="text-right">${{rounding}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <h2>Total Amount: <span class="highlight">{{invoice_value}}</span></h2>
+        </div>
+    </div>
+</body>
+</html>
