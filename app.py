@@ -18,6 +18,10 @@ db_config = {
     "port": int(os.getenv("DB_PORT", 3306))
 }
 
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('images', filename)
+
 def get_db_connection():
     return mysql.connector.connect(**db_config)
 
@@ -168,6 +172,22 @@ def fetch_invoice_data(id_contract):
         if 'con' in locals() and con.is_connected():
             con.close()
 
+def is_contract_registered(id_contract):
+    try:
+        con = get_db_connection()
+        cursor = con.cursor()
+        cursor.execute("SELECT COUNT(*) FROM contracts WHERE id_contract = %s", (id_contract,))
+        result = cursor.fetchone()
+        return result[0] > 0
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return False
+    finally:
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'con' in locals() and con.is_connected():
+            con.close()
+
 @app.route('/generateinvoice/<int:id_contract>')
 def generate_invoice(id_contract):
     try:
@@ -221,11 +241,12 @@ def get_invoice(id_contract):
 @app.route('/getinvoicepdf/<int:id_contract>')
 def get_invoice_pdf(id_contract):
     try:
-        print("Generating PDF from: ", id_contract)
+        if is_contract_registered(id_contract):
+            return jsonify({"message": "Contract not found"}), 404
+        
         invoice_data = fetch_invoice_data(id_contract)
         if not invoice_data:
             return jsonify({"message": "Invoice not found"}), 404
-        print(invoice_data)
         env = Environment(loader=FileSystemLoader('.'))
         template = env.get_template("invoice_template.html")
         html_content = template.render(invoice_data)
@@ -302,9 +323,26 @@ def contract_data():
         if 'con' in locals() and con is not None and con.is_connected():
             con.close()
 
+@app.route('/validatecontract/<int:id_contract>')
+def validate_contract(id_contract):
+    try:
+        if is_contract_registered(id_contract):
+            return jsonify({"message": "Contract not found"}), 404
+        return jsonify({"message": "Contract found"}), 200
+    except mysql.connector.Error as err:
+        return jsonify({"error": str(err)}), 500
+
 @app.route('/createcontract')
 def contract():
     return send_from_directory('.', 'create_contract.html')
+
+@app.route('/addreading')
+def addreading():
+    return send_from_directory('.', 'reading.html')
+
+@app.route('/consultinvoice')
+def consultinvoice():
+    return send_from_directory('.', 'consult_invoice.html')
 
 @app.route('/')
 def index():

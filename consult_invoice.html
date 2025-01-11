@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consult Invoice</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-message {
+            display: none;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Consult Invoice</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="invoiceForm" novalidate>
+                            <div class="mb-3">
+                                <label for="id_contract" class="form-label">Contract ID</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="id_contract" 
+                                       name="id_contract" 
+                                       required
+                                       min="1">
+                                <div id="contractHelp" class="form-text">Example: 12</div>
+                                <div class="invalid-feedback">
+                                    Please enter a valid contract ID.
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                Consult Invoice
+                            </button>
+                        </form>
+                        
+                        <div id="errorMessage" class="alert alert-danger error-message">
+                            Contract does not exist.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('invoiceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset validation state and error message
+            this.classList.remove('was-validated');
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Check form validity
+            if (!this.checkValidity()) {
+                this.classList.add('was-validated');
+                return;
+            }
+            
+            const id_contract = document.getElementById('id_contract').value;
+            
+            try {
+                // First validate the contract
+                const response = await fetch(`/validatecontract/${id_contract}`);
+                
+                if (response.status === 200) {
+                    // If contract exists, redirect to get the PDF
+                    window.location.href = `/getinvoicepdf/${id_contract}`;
+                } else if (response.status === 404) {
+                    // If contract doesn't exist, show error message
+                    document.getElementById('errorMessage').style.display = 'block';
+                } else {
+                    // Handle other potential errors
+                    console.error('Unexpected error:', response.status);
+                    document.getElementById('errorMessage').textContent = 'An unexpected error occurred. Please try again.';
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMessage').textContent = 'Network error. Please try again.';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

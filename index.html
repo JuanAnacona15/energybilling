@@ -3,175 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Energy Billing Application</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
+        body{
+            background-color: #FFFBE6;
         }
-        .form-container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .form-title {
-            color: #006B54;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        input:focus {
-            border-color: #006B54;
-            outline: none;
-        }
-        .submit-btn {
-            background: #006B54;
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('./images/energygenerator.jpg');
+            background-size: cover;
+            background-position: center;
             color: white;
-            padding: 10px 20px;
+            padding: 100px 0;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background-color: #2b7b3c;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            align-items: center; /* Center align text */
+        }
+
+        
+        .feature-card img {
+            height: 300px;
+            margin: auto;
+            display: block; /* Center align image */
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .site-btn {
+            background-color: #ffc107;
             border: none;
-            border-radius: 4px;
-            width: 100%;
-            cursor: pointer;
-            font-size: 16px;
+            padding: 8px 25px;
+            border-radius: 25px;
+            color: #000;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
         }
-        .submit-btn:hover {
-            background: #005543;
+
+        .dev-btn {
+            background-color: #2b7b3c;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin: 10px;
+            display: inline-block;
         }
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: none;
+        .img-developer{
+            /*Haz que la imagen tenga un alto de 100px y que no se redimensione si no que no se mire el sobrante*/
+            height: 300px;
+            width: 300px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2 class="form-title">Register Energy Reading</h2>
-        <form action="/reading" method="POST" onsubmit="submitForm(event)">
-            <!-- <div class="form-group">
-                <label for="contract_id">Contract ID:</label>
-                <input 
-                    type="number" 
-                    id="contract_id" 
-                    name="contract_id" 
-                    required 
-                    pattern="[0-9]+"
-                    placeholder="Enter contract ID"
-                >
-                <div class="error" id="contract_id_error">Please enter a valid contract ID</div>
-            </div> -->
 
-            <div class="form-group">
-                <label for="kw_consumed">kW Consumed:</label>
-                <input 
-                    type="number" 
-                    id="kw_consumed" 
-                    name="kw_consumed" 
-                    required 
-                    step="0.01"
-                    min="0"
-                    placeholder="Enter kW consumed"
-                >
-                <div class="error" id="kw_consumed_error">Please enter a valid kW value</div>
-            </div>
-
-            <div class="form-group">
-                <label for="counter">Counter:</label>
-                <input  
-                    id="counter" 
-                    name="counter" 
-                    required 
-                    min="0"
-                    placeholder="Enter counter reading"
-                >
-                <div class="error" id="counter_error">Please enter a valid counter reading</div>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="generateInvoice" checked>
-                <label class="form-check-label" for="generateInvoice">
-                  Generate Invoice
-                </label>
-            </div>
-                
-            <button type="submit" class="submit-btn">Submit Reading</button>
-        </form>
+    <div class="hero-section text-center">
+        <h1 class="display-4">Energy Billing App</h1>
     </div>
 
-    <script>
-        function validateForm() {
-            let isValid = true;
-            const kwConsumed = document.getElementById('kw_consumed');
-            const counter = document.getElementById('counter');
+    <div class="container">
+        <section class="about-section text-center mb-5">
+            <h2 class="mb-4">About Application</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-start" style="font-size: 22px; text-justify: inter-word;">
+                        This application was created in order to demonstrate the developer's knowledge, it is not an application that is used in business or production environments. With this web is intended to demonstrate with a practical example knowledge about software development technologies such as server management, databases, APIs, programming languages that allow to connect the entire system and above all, the ability to design functional systems.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <img src="./images/developer.jpg" alt="Development Environment" class="img-fluid rounded img-developer">
+                </div>
+            </div>
+        </section>
 
-            if (kwConsumed.value <= 0) {
-                document.getElementById('kw_consumed_error').style.display = 'block';
-                isValid = false;
-            } else {
-                document.getElementById('kw_consumed_error').style.display = 'none';
-            }
+        <section class="features-section mb-5">
+            <h2 class="text-center mb-4">Main Functions</h2>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img src="./images/invoice.png" alt="Generate Invoice" class="img-fluid rounded mb-3">
+                        <h3>Generate Invoice</h3>
+                        <p>The last energy bill can be consulted using the contract number, this will allow the user to download his bill in pdf format with all the billing data.</p>
+                        <a href="https://energybillingapp-h5gxbahgafd5a3c4.canadacentral-01.azurewebsites.net/consultinvoice" class="site-btn">Go to the site</a>
+                    </div>
+                </div>
 
-            if (counter.value <= 0) {
-                document.getElementById('counter_error').style.display = 'block';
-                isValid = false;
-            } else {
-                document.getElementById('counter_error').style.display = 'none';
-            }
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img src="./images/user-interface.png" alt="Add Contract" class="img-fluid rounded mb-3">
+                        <h3>Add Contract</h3>
+                        <p>This function allows you to add users to the database by attaching information required for subsequent calculations on invoices.</p>
+                        <a href="https://energybillingapp-h5gxbahgafd5a3c4.canadacentral-01.azurewebsites.net/createcontract" class="site-btn">Go to the site</a>
+                    </div>
+                </div>
 
-            return isValid;
-        }
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <img src="./images/counter.jpg" alt="Attach Reading" class="img-fluid rounded mb-3">
+                        <h3>Attach reading</h3>
+                        <p>This function is important since data such as kw consumed and the meter readings are added here in order to bill the cost of the service.</p>
+                        <a href="https://energybillingapp-h5gxbahgafd5a3c4.canadacentral-01.azurewebsites.net/addreading" class="site-btn">Go to the site</a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        function submitForm(e) {
-            e.preventDefault();
-            if (!validateForm()) {
-                alert("Invalid form. please try again");
-                return;
-            }
-            const data = {
-                "kw_consumed": parseInt(document.getElementById('kw_consumed').value),
-                "counter": document.getElementById('counter').value
-            };
+        <section class="cta-section text-center mb-5">
+            <h2 class="mb-4">Interested in learning more?</h2>
+            <div>
+                <a href="https://github.com/JuanAnacona15" class="dev-btn">About the developer</a>
+                <a href="https://github.com/JuanAnacona15/energybilling" class="dev-btn">Program code</a>
+            </div>
+        </section>
 
-            fetch('/reading', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Success:', result);
-                alert(result.message);
-                if (document.getElementById('generateInvoice').checked) {
-                    fetch(`/generateinvoice/${result.data["contract_id"]}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            });
-        }
-    </script>
+        <footer class="text-center mb-4">
+            <p>Developed by Juan Anacona</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
