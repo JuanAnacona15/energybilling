@@ -5,16 +5,17 @@ import mysql.connector
 from xhtml2pdf import pisa
 from jinja2 import Environment, FileSystemLoader
 import decimal
+import os
 
 app = Flask(__name__)
 
 # Database connection configuration
 db_config = {
-    "user": "manudev",        # Usuario de la base de datos
-    "password": "46&#52^Be^y*2t!", # Contraseña de la base de datos
-    "host": "devenergybilling.mysql.database.azure.com",       # Dirección del servidor (IP o dominio)
-    "database": "energybilling",     # Nombre de la base de datos
-    "port": 3306                 # Puerto del servidor (default: 3306)
+    "user": os.getenv("DB_USER", "default_user"),
+    "password": os.getenv("DB_PASSWORD", "default_password"),
+    "host": os.getenv("DB_HOST", "localhost"),
+    "database": os.getenv("DB_NAME", "default_db"),
+    "port": int(os.getenv("DB_PORT", 3306))
 }
 
 def get_db_connection():
@@ -239,6 +240,71 @@ def get_invoice_pdf(id_contract):
             return jsonify({"message": "Error generating PDF"}), 500
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
+
+@app.route('/senddatacontract', methods=['POST'])
+def contract_data():
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Content-Type must be application/json"}), 400
+        
+        data = request.json
+
+        required_fields = ['commune', 'name', 'id', 'telephone', 'address', 'stratum', 'user_points', 'counter']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        if not isinstance(data['commune'], str):
+            return jsonify({"error": "commune must be a text"}), 400
+        if not isinstance(data['name'], str):
+            return jsonify({"error": "name must be a text"}), 400
+        if not isinstance(data['id'], int):
+            return jsonify({"error": "id must be an integer"}), 400
+        if not isinstance(data['telephone'], int) or len(str(data['telephone'])) != 10:
+            return jsonify({"error": "telephone must be an integer with 10 digits"}), 400
+        if not isinstance(data['address'], str):
+            return jsonify({"error": "address must be a text"}), 400
+        if not isinstance(data['stratum'], int) or not (0 <= data['stratum'] <= 5):
+            return jsonify({"error": "stratum must be an integer in range 0-5"}), 400
+        if not isinstance(data['user_points'], int):
+            return jsonify({"error": "user_points must be an integer"}), 400
+        if not isinstance(data['counter'], str):
+            return jsonify({"error": "counter must be a text"}), 400
+
+        con = get_db_connection()
+        cursor = con.cursor()
+
+        query = """
+            INSERT INTO contracts (commune, name, id, telephone, address, stratum, user_points, counter) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (
+            data['commune'], 
+            data['name'], 
+            data['id'], 
+            data['telephone'], 
+            data['address'], 
+            data['stratum'], 
+            data['user_points'], 
+            data['counter']
+        ))
+        
+        con.commit()
+
+        return jsonify({"message": "OK"}), 201
+        
+    except mysql.connector.Error as err:
+        return jsonify({"error": str(err)}), 500
+        
+    finally:
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'con' in locals() and con is not None and con.is_connected():
+            con.close()
+
+@app.route('/createcontract')
+def contract():
+    return send_from_directory('.', 'create_contract.html')
 
 @app.route('/')
 def index():

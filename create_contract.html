@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Contract</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --secondary-yellow: #ffd54f;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .card {
+            border-color: var(--primary-green);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+        
+        .btn-primary:hover {
+            background-color: #1b5e20;
+            border-color: #1b5e20;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-yellow);
+            box-shadow: 0 0 0 0.25rem rgba(255, 213, 79, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">Add New Contract</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="contractForm" novalidate>
+                            <div class="mb-3">
+                                <label for="commune" class="form-label">Commune</label>
+                                <input type="text" class="form-control" id="commune" name="commune" required>
+                                <div class="invalid-feedback">Please enter comune.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                                <div class="invalid-feedback">Please enter name.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id" class="form-label">ID</label>
+                                <input type="number" class="form-control" id="id" name="id" required>
+                                <div class="invalid-feedback">Please enter a valid ID number.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Telephone (10 digits)</label>
+                                <input type="tel" class="form-control" id="telephone" name="telephone" 
+                                       pattern="[0-9]{10}" required>
+                                <div class="invalid-feedback">Please enter a valid 10-digit telephone number.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                                <div class="invalid-feedback">Please enter address.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="stratum" class="form-label">Stratum (0-5)</label>
+                                <input type="number" class="form-control" id="stratum" name="stratum" 
+                                       min="0" max="5" required>
+                                <div class="invalid-feedback">Please enter a stratum value between 0 and 5.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="user_points" class="form-label">User Points</label>
+                                <input type="number" class="form-control" id="user_points" name="user_points" 
+                                       value="0" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="counter" class="form-label">Counter</label>
+                                <input type="text" class="form-control" id="counter" name="counter" required>
+                                <div class="invalid-feedback">Please enter counter.</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Submit Contract</button>
+                        </form>
+                        
+                        <div id="responseMessage" class="alert mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('contractForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset previous validation state
+            this.classList.remove('was-validated');
+            
+            // Check form validity
+            if (!this.checkValidity()) {
+                this.classList.add('was-validated');
+                return;
+            }
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = ['id', 'telephone', 'stratum', 'user_points'].includes(key) 
+                    ? parseInt(value) 
+                    : value;
+            });
+            
+            try {
+                // Replace '/api/contracts' with your actual API endpoint
+                const response = await fetch('/senddatacontract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+                
+                const responseMessage = document.getElementById('responseMessage');
+                
+                if (response.ok) {
+                    responseMessage.className = 'alert alert-success mt-3';
+                    responseMessage.textContent = 'Contract added successfully!';
+                    this.reset();
+                    document.getElementById('user_points').value = '0';
+                } else {
+                    responseMessage.className = 'alert alert-danger mt-3';
+                    responseMessage.textContent = 'Error adding contract. Please try again.';
+                }
+                
+                responseMessage.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const responseMessage = document.getElementById('responseMessage');
+                responseMessage.className = 'alert alert-danger mt-3';
+                responseMessage.textContent = 'Network error. Please try again.';
+                responseMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
