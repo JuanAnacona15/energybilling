@@ -101,7 +101,9 @@
             <div class="customer-info">
                 <h2>Energy Bill</h2>
                 <p>{{contract_name}}<br>
-                {{address}}</p>
+                    {{id}}<br>
+                {{address}}
+            </p>
             </div>
         </div>
         <div class="clear"></div>
@@ -109,6 +111,7 @@
         <div class="important-info">
             <h3>Important Dates</h3>
             <p>Creation Date: {{issue_date}}<br>
+            Invoiced period: {{invoiced_period}}<br>
             Next Reading Date: {{next_reading}}<br>
             Suspension Date: {{suspension_date}}<br>
             Reading Number: {{id_reading}}</p>

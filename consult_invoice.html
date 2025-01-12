@@ -78,15 +78,13 @@
             try {
                 // First validate the contract
                 const response = await fetch(`/validatecontract/${id_contract}`);
-                
+                console.log('Response:', response);
                 if (response.status === 200) {
                     // If contract exists, redirect to get the PDF
                     window.location.href = `/getinvoicepdf/${id_contract}`;
                 } else if (response.status === 404) {
-                    // If contract doesn't exist, show error message
                     document.getElementById('errorMessage').style.display = 'block';
                 } else {
-                    // Handle other potential errors
                     console.error('Unexpected error:', response.status);
                     document.getElementById('errorMessage').textContent = 'An unexpected error occurred. Please try again.';
                     document.getElementById('errorMessage').style.display = 'block';

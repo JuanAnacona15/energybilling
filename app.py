@@ -11,10 +11,10 @@ app = Flask(__name__)
 
 # Database connection configuration
 db_config = {
-    "user": os.getenv("DB_USER", "default_user"),
-    "password": os.getenv("DB_PASSWORD", "default_password"),
-    "host": os.getenv("DB_HOST", "localhost"),
-    "database": os.getenv("DB_NAME", "default_db"),
+    "user": os.getenv("DB_USER", "username"),
+    "password": os.getenv("DB_PASSWORD", "password"),
+    "host": os.getenv("DB_HOST", "db_host"),
+    "database": os.getenv("DB_NAME", "database_name"),
     "port": int(os.getenv("DB_PORT", 3306))
 }
 
@@ -50,7 +50,6 @@ def add_reading():
 
         cursor.execute("SELECT id_contract FROM contracts WHERE counter = %s LIMIT 1;", (str(data['counter']),))
         id_contract = cursor.fetchone()[0]
-        print(id_contract)
         query = "INSERT INTO reading (contract_id, date, kw_consumed, counter) VALUES (%s, %s, %s, %s)"
         
         cursor.execute(query, (
@@ -167,7 +166,7 @@ def fetch_invoice_data(id_contract):
         else:
             return None
     except mysql.connector.Error as err:
-        return err
+        return None
     finally:
         if 'con' in locals() and con.is_connected():
             con.close()
@@ -180,7 +179,6 @@ def is_contract_registered(id_contract):
         result = cursor.fetchone()
         return result[0] > 0
     except mysql.connector.Error as err:
-        print(f"Error: {err}")
         return False
     finally:
         if 'cursor' in locals() and cursor is not None:
@@ -200,23 +198,23 @@ def generate_invoice(id_contract):
         cursor.execute("SELECT * FROM general_values")
         general_values = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM reading WHERE contract_id = %s ORDER BY date DESC LIMIT 1;", (id_contract,))
-        previous_record = cursor.fetchone()
+        cursor.execute("SELECT * FROM reading WHERE contract_id = %s ORDER BY date DESC LIMIT 2;", (id_contract,))
+        previous_record = cursor.fetchall()
 
-        cost_energy = previous_record[3] * general_values[contract_data[6] - 1][1]
-        financing = previous_record[3] * general_values[contract_data[6] - 1][2]
+        cost_energy = previous_record[0][3] * general_values[contract_data[6] - 1][1]
+        financing = previous_record[0][3] * general_values[contract_data[6] - 1][2]
         subtotal = cost_energy - financing
         rounding = subtotal - int(subtotal)
         total = subtotal - rounding + general_values[contract_data[6] - 1][3]
 
-        if previous_record:
-            invoiced_period = f"{previous_record[2].strftime('%Y-%m-%d')} - {datetime.now().strftime('%Y-%m-%d')}"
+        if previous_record[1]:
+            invoiced_period = f"{previous_record[0][2].strftime('%Y-%m-%d')} - {previous_record[1][2].strftime('%Y-%m-%d')}"
         else:
             invoiced_period = "First invoice"
         expedition_date = datetime.now()
 
         cursor.execute("INSERT INTO invoice (id_contract, value, invoiced_period, issue_date, id_reading, kw_cost, financing, public_lighting) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
-                       (contract_data[0], total, invoiced_period, expedition_date, previous_record[0], general_values[contract_data[6] - 1][1], financing, general_values[contract_data[6] - 1][3]))
+                       (contract_data[0], total, invoiced_period, expedition_date, previous_record[0][0], general_values[contract_data[6] - 1][1], financing, general_values[contract_data[6] - 1][3]))
         con.commit()
 
         return jsonify({"message": "Invoice generated successfully"}), 201
@@ -241,12 +239,19 @@ def get_invoice(id_contract):
 @app.route('/getinvoicepdf/<int:id_contract>')
 def get_invoice_pdf(id_contract):
     try:
-        if is_contract_registered(id_contract):
+        if not is_contract_registered(id_contract):
             return jsonify({"message": "Contract not found"}), 404
         
         invoice_data = fetch_invoice_data(id_contract)
         if not invoice_data:
             return jsonify({"message": "Invoice not found"}), 404
+
+        invoice_data["kw_cost"] = round(invoice_data["kw_cost"], 2)
+        invoice_data["financing"] = round(invoice_data["financing"], 2)
+        invoice_data["public_lighting"] = round(invoice_data["public_lighting"], 2)
+        invoice_data["cost_energy"] = round(invoice_data["cost_energy"], 2)
+        invoice_data["subtotal"] = round(invoice_data["subtotal"], 2)
+
         env = Environment(loader=FileSystemLoader('.'))
         template = env.get_template("invoice_template.html")
         html_content = template.render(invoice_data)
@@ -267,7 +272,7 @@ def contract_data():
     try:
         if not request.is_json:
             return jsonify({"error": "Content-Type must be application/json"}), 400
-        
+
         data = request.json
 
         required_fields = ['commune', 'name', 'id', 'telephone', 'address', 'stratum', 'user_points', 'counter']
@@ -327,8 +332,8 @@ def contract_data():
 def validate_contract(id_contract):
     try:
         if is_contract_registered(id_contract):
-            return jsonify({"message": "Contract not found"}), 404
-        return jsonify({"message": "Contract found"}), 200
+            return jsonify({"message": "Contract found"}), 200
+        return jsonify({"message": "Contract not found"}), 404
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
 
