@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Invoice Not Found</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2b7b3c;
+            --light-green: #3c8c4d;
+            --dark-green: #1a6a2b;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .error-title {
+            color: var(--dark-green);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-message {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .action-button {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-button:hover {
+            background-color: var(--light-green);
+            color: white;
+        }
+
+        .meter-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 2rem;
+        }
+
+        .meter-icon path {
+            fill: var(--primary-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-container">
+            <!-- Simple meter icon SVG -->
+            <svg class="meter-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+            </svg>
+            
+            <div class="error-code">404</div>
+            <h1 class="error-title">Invoice Not Found</h1>
+            <p class="error-message">
+                It seems you're a new user! Before we can generate your first invoice, 
+                we need your initial meter reading. Please register your first meter reading 
+                to start tracking your energy consumption.
+            </p>
+            <a href="/addreading" class="action-button">
+                Register Meter Reading
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

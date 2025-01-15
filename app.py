@@ -11,10 +11,10 @@ app = Flask(__name__)
 
 # Database connection configuration
 db_config = {
-    "user": os.getenv("DB_USER", "username"),
+    "user": os.getenv("DB_USER", "user"),
     "password": os.getenv("DB_PASSWORD", "password"),
-    "host": os.getenv("DB_HOST", "db_host"),
-    "database": os.getenv("DB_NAME", "database_name"),
+    "host": os.getenv("DB_HOST", "urldatabase"),
+    "database": os.getenv("DB_NAME", "db_name"),
     "port": int(os.getenv("DB_PORT", 3306))
 }
 
@@ -99,7 +99,7 @@ def fetch_invoice_data(id_contract):
                     SELECT *
                     FROM invoice
                     WHERE id_contract = %s
-                    ORDER BY issue_date DESC
+                    ORDER BY invoice_id DESC
                     LIMIT 1
                 )
                 SELECT 
@@ -198,7 +198,7 @@ def generate_invoice(id_contract):
         cursor.execute("SELECT * FROM general_values")
         general_values = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM reading WHERE contract_id = %s ORDER BY date DESC LIMIT 2;", (id_contract,))
+        cursor.execute("SELECT * FROM reading WHERE contract_id = %s ORDER BY id_reading DESC LIMIT 2;", (id_contract,))
         previous_record = cursor.fetchall()
 
         cost_energy = previous_record[0][3] * general_values[contract_data[6] - 1][1]
@@ -206,6 +206,9 @@ def generate_invoice(id_contract):
         subtotal = cost_energy - financing
         rounding = subtotal - int(subtotal)
         total = subtotal - rounding + general_values[contract_data[6] - 1][3]
+
+        if len(previous_record) == 1:
+            return jsonify({"message": "Cannot generate invoice"}), 400
 
         if previous_record[1]:
             invoiced_period = f"{previous_record[0][2].strftime('%Y-%m-%d')} - {previous_record[1][2].strftime('%Y-%m-%d')}"
@@ -272,7 +275,6 @@ def contract_data():
     try:
         if not request.is_json:
             return jsonify({"error": "Content-Type must be application/json"}), 400
-
         data = request.json
 
         required_fields = ['commune', 'name', 'id', 'telephone', 'address', 'stratum', 'user_points', 'counter']
@@ -297,9 +299,16 @@ def contract_data():
         if not isinstance(data['counter'], str):
             return jsonify({"error": "counter must be a text"}), 400
 
+
         con = get_db_connection()
         cursor = con.cursor()
 
+        cursor.execute("SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS r FROM contracts WHERE counter = %s;", (data['counter'],))
+        resp = cursor.fetchone()
+    
+        if resp[0] == 1:
+            return jsonify({"error": "Counter already exists"}), 401
+        
         query = """
             INSERT INTO contracts (commune, name, id, telephone, address, stratum, user_points, counter) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
@@ -315,11 +324,23 @@ def contract_data():
             data['counter']
         ))
         
+        query = "INSERT INTO reading (contract_id, date, kw_consumed, counter) VALUES (%s, %s, %s, %s)"
+
+        cursor.execute("SELECT id_contract FROM contracts WHERE id = %s LIMIT 1;", (data['id'],))
+        id_contract = cursor.fetchone()[0]
+        
+        cursor.execute(query, (
+            id_contract, 
+            datetime.now(), 
+            0, 
+            data['counter']
+        ))
         con.commit()
 
-        return jsonify({"message": "OK"}), 201
+        return jsonify({"ok": True}), 201
         
     except mysql.connector.Error as err:
+        print(err)
         return jsonify({"error": str(err)}), 500
         
     finally:
@@ -331,9 +352,9 @@ def contract_data():
 @app.route('/validatecontract/<int:id_contract>')
 def validate_contract(id_contract):
     try:
-        if is_contract_registered(id_contract):
-            return jsonify({"message": "Contract found"}), 200
-        return jsonify({"message": "Contract not found"}), 404
+        if not is_contract_registered(id_contract):
+            return jsonify({"message": "Contract found"}), 404
+        return jsonify({"message": "Contract registered"}), 200
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
 

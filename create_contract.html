@@ -96,7 +96,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label for="counter" class="form-label">Counter</label>
+                                <label for="counter" class="form-label">Counter (Remember)</label>
                                 <input type="text" class="form-control" id="counter" name="counter" required>
                                 <div class="invalid-feedback">Please enter counter.</div>
                             </div>
@@ -105,6 +105,7 @@
                         </form>
                         
                         <div id="responseMessage" class="alert mt-3" style="display: none;"></div>
+                        <p>Register the first reading for the contract <a href="/addreading">here</a>.</p>
                     </div>
                 </div>
             </div>
@@ -145,13 +146,16 @@
                 });
                 
                 const responseMessage = document.getElementById('responseMessage');
-                
+
                 if (response.ok) {
                     responseMessage.className = 'alert alert-success mt-3';
                     responseMessage.textContent = 'Contract added successfully!';
                     this.reset();
                     document.getElementById('user_points').value = '0';
-                } else {
+                } else if(response.status === 401){
+                    responseMessage.className = 'alert alert-danger mt-3';
+                    responseMessage.textContent = "Counter already exists";
+                }else {
                     responseMessage.className = 'alert alert-danger mt-3';
                     responseMessage.textContent = 'Error adding contract. Please try again.';
                 }

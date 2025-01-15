@@ -102,9 +102,10 @@
                   Generate Invoice
                 </label>
             </div>
-                
+            <div id="responseMessage" class="alert mt-3" style="display: none;"></div>
             <button type="submit" class="submit-btn">Submit Reading</button>
         </form>
+        <p>Consult your contract invoice <a id="redirectPdfInvoice"  href="/consultinvoice">here</a>.</p>
     </div>
 
     <script>
@@ -140,7 +141,7 @@
                 "kw_consumed": parseInt(document.getElementById('kw_consumed').value),
                 "counter": document.getElementById('counter').value
             };
-
+            const responseMessage = document.getElementById('responseMessage');
             fetch('/reading', {
                 method: 'POST',
                 headers: {
@@ -150,11 +151,14 @@
             })
             .then(response => response.json())
             .then(result => {
-                console.log('Success:', result);
-                alert(result.message);
+                responseMessage.className = 'alert alert-success mt-3';
+                responseMessage.textContent = `Reading added to contract ${result.data["contract_id"]} (Remember it)`;
+                responseMessage.style.display = 'block';
                 if (document.getElementById('generateInvoice').checked) {
                     fetch(`/generateinvoice/${result.data["contract_id"]}`);
                 }
+
+                document.getElementById("redirectPdfInvoice").href = `/getinvoicepdf/${result.data["contract_id"]}`;
             })
             .catch(error => {
                 console.error('Error:', error);
